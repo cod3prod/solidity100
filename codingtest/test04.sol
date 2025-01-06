@@ -131,7 +131,7 @@ contract TEST4 {
             revert("Try again");
         }
 
-        setUserBalanceByAddress(msg.sender, _u.balance - 0.1 ether);
+        setUserBalanceByAddress(msg.sender, _u.balance - 0.01 ether);
     }
 
     // 입금
