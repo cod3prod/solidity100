@@ -110,7 +110,7 @@ contract TEST4 {
     // 게임 참가
     function participate() public {
         User memory _u = getUserByAddress(msg.sender);
-        require(_u.balance >= 0.1 ether, "You must pay fee");
+        require(_u.balance >= 0.01 ether, "You must pay fee");
 
         for (uint i = 0; i < room.length; i++) {
             if (room[i].addr == msg.sender) {
