@@ -2,83 +2,144 @@
 
 pragma solidity >=0.8.2 <0.9.0;
 
-// 숫자형 변수 a를 선언하고 a를 바꿀 수 있는 함수를 구현하세요.
-// 한번 바꾸면 그로부터 10분동안은 못 바꾸게 하는 함수도 같이 구현하세요.
-contract Q071 {
-    uint256 public a;
-    uint256 public updatedAt;
-
-    function setA(uint256 num) external {
-        require(block.timestamp >= updatedAt + 600, "You cannot updated yet.");
-        a = num;
-        updatedAt = block.timestamp;
+// a의 b승을 반환하는 함수를 구현하세요.
+contract Q061 {
+    function pow(uint a, uint b) public pure returns (uint) {
+        return a ** b;
     }
 }
 
-// contract에 돈을 넣을 수 있는 deposit 함수를 구현하세요. 해당 contract의 돈을 인출하는 함수도 구현하되 오직 owner만 할 수 있게 구현하세요. owner는 배포와 동시에 배포자로 설정하십시오. 한번에 가장 많은 금액을 예치하면 owner는 바뀝니다.
-// 예) A (배포 직후 owner), B가 20 deposit(B가 owner), C가 10 deposit(B가 여전히 owner), D가 50 deposit(D가 owner), E가 20 deposit(D), E가 45 depoist(D), E가 65 deposit(E가 owner)
-contract Q072 {
-    address owner;
-    uint256 value;
+// 2개의 숫자를 더하는 함수, 곱하는 함수 a의 b승을 반환하는 함수를 구현하는데 3개의 함수 모두 2개의 input값이 10을 넘지 않아야 하는 조건을 최대한 효율적으로 구현하세요.
+contract Q062 {
+    modifier checkNum(uint a, uint b) {
+        require(a < 10 && b < 10, "Invalid input");
+        _;
+    }
 
-    function deposit() external payable {
-        if (msg.value > value) {
-            owner = msg.sender;
+    function add(uint a, uint b) public pure checkNum(a, b) returns (uint) {
+        return a + b;
+    }
+
+    function mul(uint a, uint b) public pure checkNum(a, b) returns (uint) {
+        return a * b;
+    }
+
+    function pow(uint a, uint b) public pure checkNum(a, b) returns (uint) {
+        return a ** b;
+    }
+}
+
+// 2개 숫자의 차를 나타내는 함수를 구현하세요.
+contract Q063 {
+    function sub(uint a, uint b) public pure returns (uint) {
+        return a - b > 0 ? a - b : b - a;
+    }
+}
+
+// 지갑 주소를 넣으면 5개의 4bytes로 분할하여 반환해주는 함수를 구현하세요.
+contract Q064 {
+    function split(address _addr) public pure returns (bytes4[5] memory) {
+        bytes20 addr = bytes20(_addr);
+
+        bytes4[5] memory parts;
+        for (uint i = 0; i < 5; i++) {
+            parts[i] = bytes4(
+                abi.encodePacked(
+                    addr[i * 4],
+                    addr[i * 4 + 1],
+                    addr[i * 4 + 2],
+                    addr[i * 4 + 3]
+                )
+            );
         }
-    }
 
-    function withdraw(uint256 amount) external {
-        require(msg.sender == owner, "You are not the owner");
-        payable(owner).transfer(amount);
+        return parts;
     }
 }
 
-// 위의 문제의 다른 버전입니다. 누적으로 가장 많이 예치하면 owner가 바뀌게 구현하세요.
-contract Q073 {
-    address owner;
-    mapping(address => uint256) balances;
+// 숫자 3개를 입력하면 그 제곱을 반환하는 함수를 구현하세요. 그 3개 중에서 가운데 출력값만 반환하는 함수를 구현하세요.
+//  예) func A : input → 1,2,3 // output → 1,4,9 | func B : output 4 (1,4,9중 가운데 숫자)
+contract Q065 {
+    function pow(uint a) internal pure returns (uint) {
+        return a ** 2;
+    }
 
-    function deposit() external payable {
-        if (msg.value + balances[msg.sender] > balances[owner]) {
-            owner = msg.sender;
+    function getNumbers(
+        uint a,
+        uint b,
+        uint c
+    ) public pure returns (uint, uint, uint) {
+        return (pow(a), pow(b), pow(c));
+    }
+
+    function getMiddle(uint a, uint b, uint c) public pure returns (uint) {
+        return b;
+    }
+}
+
+// 특정 숫자를 입력했을 때 자릿수를 알려주는 함수를 구현하세요. 추가로 그 숫자를 5진수로 표현했을 때는 몇자리 숫자가 될 지 알려주는 함수도 구현하세요.
+contract Q066 {
+    function getDigit(uint n) public pure returns (uint) {
+        if (n == 0) {
+            return 1;
         }
-        balances[msg.sender] += msg.value;
-    }
 
-    function withdraw(uint256 amount) external {
-        require(msg.sender == owner, "You are not the owner");
-        payable(owner).transfer(amount);
-    }
-}
-
-// 어느 숫자를 넣으면 항상 10%를 추가로 더한 값을 반환하는 함수를 구현하세요. 
-//  예) 20 -> 22(20 + 2, 2는 20의 10%), 0 // 50 -> 55(50+5, 5는 50의 10%), 0 // 42 -> 46(42+4), 4 (42의 10%는 4.2 -> 46.2, 46과 2를 분리해서 반환) // 27 => 29(27+2), 7 (27의 10%는 2.7 -> 29.7, 29와 7을 분리해서 반환)
-contract Q074 {
-    function getNumber(uint256 num) external pure returns (uint256, uint256) {
-        uint256 addedAmount = (num * 10) / 100; 
-        uint256 finalAmount = num + addedAmount;
-        
-        uint256 integerPart = finalAmount; // 정수
-        uint256 decimalPart = finalAmount - integerPart;  // 소수
-
-        return (integerPart, decimalPart);
-    }
-}
-
-// 문자열을 넣으면 n번 반복하여 쓴 후에 반환하는 함수를 구현하세요.
-contract Q075 {
-    function getString(string calldata _str, uint n) external pure returns(string memory) {
-        string memory str = "";
-        for(uint i = 0 ; i < n ; i++){
-            str = string.concat(str, _str);
+        uint digit = 0;
+        while (n > 0) {
+            digit++;
+            n /= 10;
         }
-        return str;
+
+        return digit;
     }
 }
 
-// 숫자 123을 넣으면 문자 123으로 반환하는 함수를 직접 구현하세요. 
-contract Q076 {
-    function numToStr(uint num) external pure returns (string memory) {
+// 자신의 현재 잔고를 반환하는 함수를 보유한 Contract A와 다른 주소로 돈을 보낼 수 있는 Contract B를 구현하세요.
+contract Q067_A {
+    receive() external payable {}
+
+    function getBalance() external view returns (uint) {
+        return address(this).balance;
+    }
+}
+
+contract Q067_B {
+    receive() external payable {}
+
+    function deposit() external payable {}
+
+    function transfer(address _addr, uint _amount) external {
+        require(address(this).balance >= _amount, "Insufficient balance");
+        payable(_addr).transfer(_amount);
+    }
+}
+
+// 계승(팩토리얼)을 구하는 함수를 구현하세요. 계승은 그 숫자와 같거나 작은 모든 수들을 곱한 값이다.
+//  예) 5 → 1*2*3*4*5 = 60, 11 → 1*2*3*4*5*6*7*8*9*10*11 = 39916800
+contract Q068 {
+    function factorial(uint n) public pure returns (uint) {
+        uint result = 1;
+        for (uint i = 1; i <= n; i++) {
+            result *= i;
+        }
+        return result;
+    }
+}
+
+// 숫자 1,2,3을 넣으면 1 and 2 or 3 라고 반환해주는 함수를 구현하세요.
+contract Q069 {
+    function getString(
+        uint a,
+        uint b,
+        uint c
+    ) public pure returns (string memory) {
+        string memory aStr = numToStr(a);
+        string memory bStr = numToStr(b);
+        string memory cStr = numToStr(c);
+        return string.concat(aStr, " and ", bStr, " or ", cStr);
+    }
+
+    function numToStr(uint num) internal pure returns (string memory) {
         if (num == 0) {
             return "0";
         }
@@ -86,7 +147,7 @@ contract Q076 {
         bytes memory buffer;
 
         while (num > 0) {
-            buffer = abi.encodePacked(uint8(48 + (num%10)), buffer);
+            buffer = abi.encodePacked(uint8(48 + (num % 10)), buffer);
             num /= 10;
         }
 
@@ -94,106 +155,23 @@ contract Q076 {
     }
 }
 
-// 위의 문제와 비슷합니다. 이번에는 openzeppelin의 패키지를 import 하세요.
-import "@openzeppelin/contracts/utils/Strings.sol";
-contract Q077 {
-    function numToStr(uint num) external pure returns (string memory) {
-        return Strings.toString(num);
-    }
-}
-
-// 숫자만 들어갈 수 있는 array를 선언하세요. array 안 요소들 중 최소 하나는 10~25 사이에 있는지를 알려주는 함수를 구현하세요.
-contract Q078 {
-    uint[] public arr;
-
-    function push(uint n) external {
-        arr.push(n);
-    }
-
-    function getNums() external view returns(uint[] memory) {
-        return arr;
-    }
-
-    function checkNumbers() external view returns (bool) {
-        uint len = arr.length;
-        for(uint i = 0; i < len ; i++) {
-            if(arr[i] >= 10 && arr[i] <= 25) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-
-// 3개의 숫자를 넣으면 그 중에서 가장 큰 수를 찾아내주는 함수를 Contract A에 구현하세요. Contract B에서는 이름, 번호, 점수를 가진 구조체 학생을 구현하세요. 학생의 정보를 3명 넣되 그 중에서 가장 높은 점수를 가진 학생을 반환하는 함수를 구현하세요. 구현할 때는 Contract A를 import 하여 구현하세요
-contract Q079_A {
-    function max(uint[3] memory arr) internal pure returns (uint) {
-        uint largest = arr[0];
-        for (uint i = 1; i < arr.length; i++) {
-            if (arr[i] > largest) {
-                largest = arr[i];
-            }
-        }
-        return largest;
-    }
-}
-
-contract Q079_B is Q079_A {
-    
-    struct Student {
-        string name;
+// 번호와 이름 그리고 bytes로 구성된 고객이라는 구조체를 만드세요. bytes는 번호와 이름을 keccak 함수의 input 값으로 넣어 나온 output값입니다. 고객의 정보를 넣고 변화시키는 함수를 구현하세요.
+contract Q070 {
+    struct Customer {
         uint number;
-        uint score;
+        string name;
+        bytes32 data;
     }
 
-    Student[3] public students;
-
-    function addStudents(string[3] memory names, uint[3] memory numbers, uint[3] memory scores) public {
-        for (uint i = 0; i < 3; i++) {
-            students[i] = Student(names[i], numbers[i], scores[i]);
-        }
-    }
-
-    function getTopStudent() public view returns (Student memory) {
-        uint[3] memory scores = [students[0].score, students[1].score, students[2].score];
-        uint highestScore = max(scores);
-
-        Student memory result;
-        for (uint i = 0; i < 3; i++) {
-            if (students[i].score == highestScore) {
-                result = students[i];
-            }
-        }
-
-        return result;
-    }
-}
-
-// 지금은 동적 array에 값을 넣으면(push) 가장 앞부터 채워집니다. 1,2,3,4 순으로 넣으면 [1,2,3,4] 이렇게 표현됩니다. 그리고 값을 빼려고 하면(pop) 끝의 숫자부터 빠집니다. 가장 먼저 들어온 것이 가장 마지막에 나갑니다. 이런 것들을FILO(First In Last Out)이라고도 합니다. 가장 먼저 들어온 것을 가장 먼저 나가는 방식을 FIFO(First In First Out)이라고 합니다. push와 pop을 이용하되 FIFO 방식으로 바꾸어 보세요.
-contract Q080 {
-    uint[] public queue;
-
-    function enqueue(uint value) external {
-        queue.push(value);
-    }
-
-    function dequeue() external{
-        uint len = queue.length;
-        require(len > 0, "The queue is empty");
-        
-        uint[] memory newQueue = new uint[](len-1);
-        for(uint i = 0 ; i < len ; i++) {
-            if(i == 0) {
-                continue;
-            } else {
-                newQueue[i-1] = queue[i];
-            }
-        } 
-        
-        queue = newQueue;
-    }
-
-    function getQueue() external view returns(uint[] memory) {
-        return queue;
+    function addCustomer(
+        uint _number,
+        string memory _name
+    ) external pure returns (Customer memory) {
+        Customer memory customer = Customer(
+            _number,
+            _name,
+            keccak256(abi.encodePacked(_number, _name))
+        );
+        return customer;
     }
 }
