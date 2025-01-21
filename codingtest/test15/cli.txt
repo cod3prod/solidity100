@@ -1,0 +1,11 @@
+1) hardhat 프로젝트 시작 
+- npx hardhat init
+2) contract 컴파일
+- npx hardhat compile
+3) contract local testnet에 배포
+- npx hardhat node // anoter terminal
+- npx hardhat ignition deploy ./ignition/modules/deploy.js --network localhost --deployment-id myToken
+4) contract sepolia testnet에 배포
+- npx hardhat ignition deploy ./ignition/modules/deploy.js --network sepolia --deployment-id myToken
+5) sepolia에 배포된 contract verify 
+- npx hardhat ignition verify myToken
